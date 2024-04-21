@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-
 const ToDoController = require("./controller/ToDoController.js");
+const IncubatorController = require("./controller/IncubatorController.js");
 
 const app = express();
 //middleware
@@ -16,6 +16,7 @@ db.sequelize.sync().then((onSuccess) => {
 
     //routes
     app.use("/todos", ToDoController(db.sequelize));
+    app.use("/incubator", IncubatorController(db.sequelize));
 
     app.listen(5000, () => {
         console.log("server has started on port 5000");
