@@ -55,11 +55,50 @@ function StartUpController(sequelize) {
         return message;
     }
 
-    router.get("/getStartupsWithIncubatorId", async (req,res) => {
+    router.get("/getWithRoleFilter", async (req, res) => {
         let masuk = "";
         try {
             // const incubators = await sequelize.models.Incubator.findAll();
             // res.json(incubators);
+            const query = req.query;
+            const roleFilter = query.roleFilter;
+
+            let whereObj = {};
+            if (roleFilter){
+                whereObj = {
+                    roleOfFounder: roleFilter
+                };
+            }
+
+            const startUps = await sequelize.models.Startup.findAll({
+                where: whereObj,
+                attributes: ["id", "startUpName", "founderName","roleOfFounder", "valuation"],
+                order: [["roleOfFounder", "DESC"]],
+                include: {
+                    model: sequelize.models.Incubator,
+                    attributes: ["code"]
+                }
+                
+            });
+            //const jsonStartUps = startUps.toJSON();
+            let test = startUps[0].toJSON();
+            res.json(startUps);
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
+
+    router.get("/:id", async (req,res) => {
+        let masuk = "";
+        try {
+            // const incubators = await sequelize.models.Incubator.findAll();
+            // res.json(incubators);
+            const id = req.params.id;
+            const startUp = await sequelize.models.Startup.findByPk(id, { 
+                include: sequelize.models.Incubator 
+            });
+            const jsonStartUp = startUp.toJSON();
+            res.json(jsonStartUp);
         } catch (err) {
             console.error(err.message);
         }
@@ -76,7 +115,6 @@ function StartUpController(sequelize) {
                 res.status(400).end();
                 return;
             }
-
 
             const objToBeSaved = sequelize.models.Startup.build({
                 startUpName: startup.startUpName,
@@ -95,6 +133,46 @@ function StartUpController(sequelize) {
         }
     });
 
+    router.put("/", async (req, res) => {
+        let test = "";
+        try {
+            const startup = req.body;
+
+            let message = verify(startup);
+            if (message) {
+                res.statusMessage = message;
+                res.status(400).end();
+                return;
+            }
+
+            const startUpToBeEdited = await sequelize.models.Startup.findByPk(startup.id);
+
+            startUpToBeEdited.startUpName = startup.startUpName;
+            startUpToBeEdited.founderName = startup.founderName;
+            startUpToBeEdited.educationOfFounder = startup.educationOfFounder;
+            startUpToBeEdited.roleOfFounder = startup.roleOfFounder;
+            startUpToBeEdited.dateFound = startup.dateFound;
+            startUpToBeEdited.valuation = startup.valuation;
+
+            await startUpToBeEdited.save();
+            res.json(startUpToBeEdited);
+
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
+
+    router.delete("/:id", async (req, res) => {
+        let test = "";
+        try {
+            const id = req.params.id;
+            const startUpToBeDeleted = await sequelize.models.Startup.findByPk(id);
+            await startUpToBeDeleted.destroy();
+            res.json("startup was deleted");
+        } catch (err) {
+            console.error(err.message);
+        }
+    });
     
 
     return router;
