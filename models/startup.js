@@ -11,20 +11,32 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
         // define association here
+            sequelize.models.Incubator.hasMany(this, { foreignKey: 'IncubatorId' });
+            this.belongsTo(sequelize.models.Incubator);
         }
     }
     Startup.init({
         id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: DataTypes.INTEGER
+            allowNull: false,
+            autoIncrement: true,
+            primaryKey: true,
+            type: DataTypes.INTEGER
         },
         startUpName: DataTypes.STRING,
         founderName: DataTypes.STRING,
         educationOfFounder: DataTypes.STRING,
         roleOfFounder: DataTypes.STRING,
-        dateFound: DataTypes.DATE
+        dateFound: DataTypes.DATE,
+        valuation: DataTypes.INTEGER,
+        IncubatorId: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: {
+                    tableName: 'Incubators',
+                    key: 'id',
+                },
+            }
+        }
     }, {
         sequelize,
         modelName: 'Startup',

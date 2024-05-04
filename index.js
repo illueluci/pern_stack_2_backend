@@ -10,6 +10,7 @@ app.use(express.json());
 
 //db
 const db = require("./models");
+const StartUpController = require("./controller/StartUpController.js");
 
 db.sequelize.sync().then((onSuccess) => {
     console.log("db.sequelize.sync() successful");
@@ -17,6 +18,7 @@ db.sequelize.sync().then((onSuccess) => {
     //routes
     app.use("/todos", ToDoController(db.sequelize));
     app.use("/incubator", IncubatorController(db.sequelize));
+    app.use("/startup", StartUpController(db.sequelize));
 
     app.listen(5000, () => {
         console.log("server has started on port 5000");
